@@ -27,3 +27,5 @@ Reduce urban carbon emissions through intelligent traffic and environmental mana
 - React-based dashboard
 ## Development Approach
 The system uses simulation data and reinforcement learning to improve urban carbon management.
+## Expected Outcome
+The project aims to support better urban planning and reduce carbon emissions through data-driven decisions.
