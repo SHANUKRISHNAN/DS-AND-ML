@@ -37,3 +37,5 @@ The project aims to support better urban planning and reduce carbon emissions th
 - Supports sustainable urban development
 - Helps analyze carbon reduction strategies
 - Provides data-driven insights
+## Conclusion
+EcoTwin combines simulation and reinforcement learning to build smarter and greener urban environments.
