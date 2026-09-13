@@ -25,3 +25,5 @@ Reduce urban carbon emissions through intelligent traffic and environmental mana
 - Reinforcement learning model
 - FastAPI backend
 - React-based dashboard
+## Development Approach
+The system uses simulation data and reinforcement learning to improve urban carbon management.
