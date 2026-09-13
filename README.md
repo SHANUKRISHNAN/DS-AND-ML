@@ -20,3 +20,8 @@ Reduce urban carbon emissions through intelligent traffic and environmental mana
 - Real-time urban carbon monitoring
 - Reinforcement learning based optimization
 - Traffic-aware carbon dispersal analysis
+## System Components
+- SUMO traffic simulation
+- Reinforcement learning model
+- FastAPI backend
+- React-based dashboard
