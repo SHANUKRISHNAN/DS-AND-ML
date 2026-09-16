@@ -24,3 +24,15 @@ traffic_density = calculate_traffic_density(
 )
 
 print("Traffic Density:", traffic_density, "%")
+def classify_traffic_level(density):
+    if density < 30:
+        return "Low Traffic"
+    elif density < 70:
+        return "Medium Traffic"
+    else:
+        return "High Traffic"
+
+
+traffic_level = classify_traffic_level(traffic_density)
+
+print("Traffic Level:", traffic_level)
