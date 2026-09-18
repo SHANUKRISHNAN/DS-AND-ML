@@ -13,6 +13,9 @@ function App() {
           <p>Road Capacity: 200</p>
           <p className="high">Traffic Level: High</p>
           <p>Traffic Density:75%</p>
+          <div className="progress-bar">
+  <div className="progress-fill"></div>
+</div>
         </div>
 
         <div className="card">
