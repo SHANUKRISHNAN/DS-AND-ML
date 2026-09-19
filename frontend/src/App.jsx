@@ -22,6 +22,9 @@ function App() {
           <h3>Carbon Emission</h3>
           <p>Total Emission: 18 kg</p>
           <p className="moderate">Emission Level: Moderate</p>
+          <div className="emission-bar">
+  <div className="emission-fill"></div>
+</div>
         </div>
 
         <div className="card">
