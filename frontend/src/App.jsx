@@ -1,6 +1,8 @@
+import { useState } from "react";
 import "./App.css";
 
 function App() {
+  const [vehicles, setVehicles] = useState(150);
   return (
     <div className="dashboard">
       <h1>EcoTwin Dashboard</h1>
@@ -9,10 +11,16 @@ function App() {
       <div className="cards">
         <div className="card">
           <h3>Traffic Monitoring</h3>
-          <p>Vehicles: 150</p>
+          <label>Vehicle Count:</label>
+<input
+  type="number"
+  value={vehicles}
+  onChange={(e) => setVehicles(Number(e.target.value))}
+/>
+          <p>Vehicles: {vehicles}</p>
           <p>Road Capacity: 200</p>
           <p className="high">Traffic Level: High</p>
-          <p>Traffic Density:75%</p>
+          <p>Traffic Density: {Math.round((vehicles / 200) * 100)}%</p>
           <div className="progress-bar">
   <div className="progress-fill"></div>
 </div>
