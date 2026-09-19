@@ -3,6 +3,7 @@ import "./App.css";
 
 function App() {
   const [vehicles, setVehicles] = useState(150);
+  const [capacity, setCapacity] = useState(200);
   return (
     <div className="dashboard">
       <h1>EcoTwin Dashboard</h1>
@@ -18,9 +19,15 @@ function App() {
   onChange={(e) => setVehicles(Number(e.target.value))}
 />
           <p>Vehicles: {vehicles}</p>
-          <p>Road Capacity: 200</p>
+          <p>Road Capacity: {capacity}</p>
+          <label>Road Capacity:</label>
+<input
+  type="number"
+  value={capacity}
+  onChange={(e) => setCapacity(Number(e.target.value))}
+/>
           <p className="high">Traffic Level: High</p>
-          <p>Traffic Density: {Math.round((vehicles / 200) * 100)}%</p>
+          <p>Traffic Density: {capacity > 0 ? Math.round((vehicles / capacity) * 100) : 0}%</p>
           <div className="progress-bar">
   <div className="progress-fill"></div>
 </div>
