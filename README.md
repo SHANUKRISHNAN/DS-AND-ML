@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # EcoTwin: Reinforcement Learning for Urban Carbon Dispersal
 
 This is a **working, tested VS Code project template** for the 13-day project plan. The supplied dataset is already placed in `data/raw/EcoTwin_dataset_raw.csv`.
@@ -110,3 +111,6 @@ git push -u origin main
 ```
 
 If `origin` already exists, do not run `git remote add origin` again. Use `git remote -v` to inspect it.
+=======
+# DS-AND-ML
+>>>>>>> 13da94ff2f4f3b2dcedbe8cf8415fadd5dd36849
