@@ -62,7 +62,13 @@ function App() {
         <div className="card">
           <h3>Traffic Optimization</h3>
           <p>Recommended Action:</p>
-          <p className="action">Increase Green Signal Time</p>
+          <p className="action">
+  {vehicles / capacity >= 0.8
+    ? "Increase Green Signal Time"
+    : vehicles / capacity >= 0.5
+    ? "Optimize Traffic Flow"
+    : "Maintain Current Signal Timing"}
+</p>
         </div>
       </div>
     </div>
