@@ -20,13 +20,15 @@ function App() {
 />
           <p>Vehicles: {vehicles}</p>
           <p>Road Capacity: {capacity}</p>
-          <label>Road Capacity:</label>
+          <label>Update Road Capacity:</label>
 <input
   type="number"
   value={capacity}
   onChange={(e) => setCapacity(Number(e.target.value))}
 />
-          <p className="high">Traffic Level: High</p>
+          <p className={vehicles / capacity >= 0.8 ? "high" : vehicles / capacity >= 0.5 ? "moderate" : "action"}>
+  Traffic Level: {vehicles / capacity >= 0.8 ? "High" : vehicles / capacity >= 0.5 ? "Medium" : "Low"}
+</p>
           <p>Traffic Density: {capacity > 0 ? Math.round((vehicles / capacity) * 100) : 0}%</p>
           <div className="progress-bar">
   <div className="progress-fill"></div>
