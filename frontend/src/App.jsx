@@ -14,6 +14,22 @@ function App() {
     <div className="dashboard">
       <h1>EcoTwin Dashboard</h1>
       <h2>Urban Carbon Dispersion Monitoring System</h2>
+      <div className="summary">
+  <div className="summary-box">
+    <h3>Total Vehicles</h3>
+    <p>{vehicles}</p>
+  </div>
+
+  <div className="summary-box">
+    <h3>Road Capacity</h3>
+    <p>{capacity}</p>
+  </div>
+
+  <div className="summary-box">
+    <h3>Total Emission</h3>
+    <p>{emission} kg</p>
+  </div>
+</div>
       <button onClick={refreshData}>Refresh Data</button>
 
       <div className="cards">

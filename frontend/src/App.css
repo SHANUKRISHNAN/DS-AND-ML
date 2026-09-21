@@ -134,3 +134,30 @@ p {
   background-color: orange;
   border-radius: 10px;
 }
+.summary {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 25px 0;
+}
+
+.summary-box {
+  background-color: white;
+  padding: 15px 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+}
+
+.summary-box h3 {
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.summary-box p {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0f172a;
+}
