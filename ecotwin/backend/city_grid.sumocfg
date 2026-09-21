@@ -1,0 +1,15 @@
+<!-- city_grid.sumocfg -->
+<configuration>
+    <input>
+        <net-file value="city_grid.net.xml"/>
+        <route-files value="city_grid.rou.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+    </time>
+    <report>
+        <no-step-log value="true"/>
+        <duration-log.disable value="true"/>
+    </report>
+</configuration>
