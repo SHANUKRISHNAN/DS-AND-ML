@@ -4,6 +4,7 @@ import "./App.css";
 function App() {
   const [vehicles, setVehicles] = useState(150);
   const [capacity, setCapacity] = useState(200);
+  const [emission, setEmission] = useState(18);
   return (
     <div className="dashboard">
       <h1>EcoTwin Dashboard</h1>
@@ -37,8 +38,16 @@ function App() {
 
         <div className="card">
           <h3>Carbon Emission</h3>
-          <p>Total Emission: 18 kg</p>
-          <p className="moderate">Emission Level: Moderate</p>
+          <p>Total Emission: {emission} kg</p>
+          <label>Update Emission:</label>
+<input
+  type="number"
+  value={emission}
+  onChange={(e) => setEmission(Number(e.target.value))}
+/>
+          <p className={emission >= 25 ? "high" : emission >= 15 ? "moderate" : "action"}>
+  Emission Level: {emission >= 25 ? "High" : emission >= 15 ? "Moderate" : "Low"}
+</p>
           <div className="emission-bar">
   <div className="emission-fill"></div>
 </div>
