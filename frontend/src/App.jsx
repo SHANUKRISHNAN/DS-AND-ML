@@ -5,10 +5,16 @@ function App() {
   const [vehicles, setVehicles] = useState(150);
   const [capacity, setCapacity] = useState(200);
   const [emission, setEmission] = useState(18);
+  const refreshData = () => {
+  setVehicles(150);
+  setCapacity(200);
+  setEmission(18);
+};
   return (
     <div className="dashboard">
       <h1>EcoTwin Dashboard</h1>
       <h2>Urban Carbon Dispersion Monitoring System</h2>
+      <button onClick={refreshData}>Refresh Data</button>
 
       <div className="cards">
         <div className="card">
