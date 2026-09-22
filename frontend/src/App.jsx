@@ -14,6 +14,20 @@ function App() {
     <div className="dashboard">
       <h1>EcoTwin Dashboard</h1>
       <h2>Urban Carbon Dispersion Monitoring System</h2>
+      <div className="density-chart">
+  <h3>Traffic Density Chart</h3>
+  <div className="chart-bar">
+    <div
+      className="chart-fill"
+      style={{
+        width: `${capacity > 0 ? Math.min((vehicles / capacity) * 100, 100) : 0}%`
+      }}
+    ></div>
+  </div>
+  <p>
+    Density: {capacity > 0 ? Math.round((vehicles / capacity) * 100) : 0}%
+  </p>
+</div>
       <div className="summary">
   <div className="summary-box">
     <h3>Total Vehicles</h3>
