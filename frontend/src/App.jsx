@@ -14,6 +14,10 @@ function App() {
     <div className="dashboard">
       <h1>EcoTwin Dashboard</h1>
       <h2>Urban Carbon Dispersion Monitoring System</h2>
+      <div className="system-status">
+  <span className="status-dot"></span>
+  System Status: Active
+</div>
       <div className="density-chart">
   <h3>Traffic Density Chart</h3>
   <div className="chart-bar">

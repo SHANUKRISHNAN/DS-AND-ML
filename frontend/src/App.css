@@ -184,4 +184,20 @@ p {
   background-color: #3b82f6;
   border-radius: 10px;
 }
+.system-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px auto 20px;
+  font-weight: bold;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+}
 
