@@ -5,6 +5,8 @@ function App() {
   const [vehicles, setVehicles] = useState(150);
   const [capacity, setCapacity] = useState(200);
   const [emission, setEmission] = useState(18);
+  const trafficDensity =
+  capacity > 0 ? Math.round((vehicles / capacity) * 100) : 0;
   const refreshData = () => {
   setVehicles(150);
   setCapacity(200);
@@ -20,6 +22,11 @@ function App() {
 </div>
       <div className="density-chart">
   <h3>Traffic Density Chart</h3>
+  {trafficDensity >= 80 && (
+  <div className="traffic-alert">
+    ⚠️ High Traffic Alert: Please optimize traffic flow.
+  </div>
+)}
   <div className="chart-bar">
     <div
       className="chart-fill"

@@ -200,4 +200,15 @@ p {
   border-radius: 50%;
   display: inline-block;
 }
+.traffic-alert {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 12px 20px;
+  margin: 20px auto;
+  max-width: 600px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #fca5a5;
+}
 
