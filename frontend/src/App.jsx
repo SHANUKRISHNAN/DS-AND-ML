@@ -52,6 +52,17 @@ function App() {
 
   <div className="summary-box">
     <h3>Total Emission</h3>
+    <div className="emission-indicator">
+  <div
+  className={`emission-fill ${
+    emission >= 25 ? "emission-high" : emission >= 15 ? "emission-moderate" : "emission-low"
+  }`}
+    style={{
+  width: `${Math.min((emission / 30) * 100, 100)}%`,
+  backgroundColor: emission >= 25 ? "#ef4444" : emission >= 15 ? "#22c55e" : "#3b82f6"
+}}
+  ></div>
+</div>
     <p>{emission} kg</p>
   </div>
 </div>
@@ -96,7 +107,18 @@ function App() {
   Emission Level: {emission >= 25 ? "High" : emission >= 15 ? "Moderate" : "Low"}
 </p>
           <div className="emission-bar">
-  <div className="emission-fill"></div>
+  <div
+    className="emission-fill"
+    style={{
+      width: `${Math.min((emission / 30) * 100, 100)}%`,
+      backgroundColor:
+        emission >= 25
+          ? "#ef4444"
+          : emission >= 15
+          ? "#22c55e"
+          : "#3b82f6"
+    }}
+  ></div>
 </div>
         </div>
 
