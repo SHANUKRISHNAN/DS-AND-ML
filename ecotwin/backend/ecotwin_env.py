@@ -1,8 +1,13 @@
-# ecotwin_env.py
-import gym
-from gym import spaces
+import os, sys
+sys.path.append(os.path.join(os.environ["SUMO_HOME"], "tools"))
+
+import gymnasium as gym
+from gymnasium import spaces
 import numpy as np
 import traci
+import sumolib
+
+SUMO_BINARY = sumolib.checkBinary('sumo')  # resolves via $SUMO_HOME, doesn't depend on PATH
 
 
 class EcoTwinEnv(gym.Env):
@@ -23,12 +28,13 @@ class EcoTwinEnv(gym.Env):
             low=0, high=np.inf, shape=(len(tls_ids) * 2,), dtype=np.float32
         )
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
         if traci.isLoaded():
             traci.close()
-        traci.start(["sumo", "-c", self.sumocfg_path])
+        traci.start([SUMO_BINARY, "-c", self.sumocfg_path])
         self.current_step = 0
-        return self._get_obs()
+        return self._get_obs(), {}
 
     def step(self, action):
         for tls_id, phase in zip(self.tls_ids, action):
@@ -38,8 +44,9 @@ class EcoTwinEnv(gym.Env):
 
         obs = self._get_obs()
         reward = self._compute_reward()
-        done = self.current_step >= self.max_steps
-        return obs, reward, done, {}
+        terminated = self.current_step >= self.max_steps
+        truncated = False
+        return obs, reward, terminated, truncated, {}
 
     def _get_obs(self):
         data = []
@@ -56,7 +63,6 @@ class EcoTwinEnv(gym.Env):
             lanes = traci.trafficlight.getControlledLanes(tls_id)
             total_wait += sum(traci.lane.getWaitingTime(l) for l in lanes)
             total_co2 += sum(traci.lane.getCO2Emission(l) for l in lanes)
-        # Multi-objective: balance commute time against pollution hot-spots
         return -(0.5 * total_wait + 0.5 * (total_co2 / 1000.0))
 
     def close(self):
