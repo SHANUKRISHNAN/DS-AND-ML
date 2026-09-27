@@ -1,0 +1,9 @@
+// .vscode/extensions.json — recommends the right extensions on folder open
+{
+  "recommendations": [
+    "ms-python.python",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "eamodio.gitlens"
+  ]
+}
