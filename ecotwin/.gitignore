@@ -1,0 +1,25 @@
+# Python / backend
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# SUMO generated files
+backend/city_grid.net.xml
+backend/city_grid.rou.xml
+backend/*.xml.gz
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+
+# Env & secrets
+.env
+*.env.local
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# OS
+.DS_Store
