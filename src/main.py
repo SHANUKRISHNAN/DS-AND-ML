@@ -6,3 +6,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print("Backend status: Ready for EcoTwin simulation")
