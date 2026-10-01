@@ -13,13 +13,28 @@ SUMO_BINARY = sumolib.checkBinary('sumo')  # resolves via $SUMO_HOME, doesn't de
 SUMO_CONFIG = "city_grid.sumocfg"
 connected_clients: set[WebSocket] = set()
 
+GRID_SIZE = 620      # matches the SVG viewBox from GridMap.jsx / LiveMap.jsx
+CELL_SIZE = 62       # 10x10 heatmap cells across the grid
+NUM_CELLS = GRID_SIZE // CELL_SIZE  # 10
 
+
+def compute_heatmap():
+    """Buckets every vehicle's CO2 output into a coarse grid for the heatmap overlay.
+    Cell indices are clamped because a few network coordinates sit slightly outside
+    0-620 at the grid's edges (confirmed empirically: one real vehicle landed in
+    cell (4, -1) before clamping was added)."""
+    cells = {}
+    for veh_id in traci.vehicle.getIDList():
+        x, y = traci.vehicle.getPosition(veh_id)
+        cell_x = max(0, min(NUM_CELLS - 1, int(x // CELL_SIZE)))
+        cell_y = max(0, min(NUM_CELLS - 1, int(y // CELL_SIZE)))
+        co2 = traci.vehicle.getCO2Emission(veh_id)
+        key = f"{cell_x},{cell_y}"
+        cells[key] = cells.get(key, 0.0) + co2
+    return cells
+
+# Modify get_live_sim_state() in server.py to include the heatmap:
 def get_live_sim_state():
-    """Pulls current vehicle positions and emissions from the running SUMO instance.
-    Sends raw local (x, y) coordinates, not lat/lng: this grid has no real geographic
-    projection attached, so traci.simulation.convertGeo just hands the same x, y back
-    unchanged on this network — the frontend renders these directly as SVG instead of
-    pretending they're real GPS coordinates."""
     vehicles = []
     for veh_id in traci.vehicle.getIDList():
         x, y = traci.vehicle.getPosition(veh_id)
@@ -29,8 +44,7 @@ def get_live_sim_state():
             "y": y,
             "co2": traci.vehicle.getCO2Emission(veh_id),
         })
-    return {"vehicles": vehicles}
-
+    return {"vehicles": vehicles, "heatmap": compute_heatmap()}
 
 async def simulation_loop():
     """Owns the single TraCI connection for the whole server's lifetime, steps the
