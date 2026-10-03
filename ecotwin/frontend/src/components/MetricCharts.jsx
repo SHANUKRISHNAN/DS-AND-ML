@@ -22,7 +22,7 @@ export default function MetricCharts({ metricHistory }) {
                     <XAxis dataKey="step" tick={false} />
                     <YAxis tick={{ fill: '#888', fontSize: 10 }} />
                     <Tooltip contentStyle={{ background: '#222', border: 'none' }} />
-                    <Line type="monotone" dataKey="vehicleCount" stroke="#4fc3f7" dot={false} strokeWidth={2} />
+                    <Line type="monotone" dataKey="vehicleCount" name="Active Vehicles" stroke="#4fc3f7" dot={false} strokeWidth={2} />
                 </LineChart>
             </ResponsiveContainer>
         </div>
