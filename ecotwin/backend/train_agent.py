@@ -32,7 +32,7 @@ config = (
 
 algo = config.build_algo()
 
-NUM_ITERATIONS = 50
+NUM_ITERATIONS = 200
 for i in range(NUM_ITERATIONS):
     result = algo.train()
     ep_return = result.get("env_runners", {}).get("episode_return_mean")
