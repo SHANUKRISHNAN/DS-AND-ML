@@ -61,6 +61,7 @@ def get_live_sim_state():
             "x": x,
             "y": y,
             "co2": traci.vehicle.getCO2Emission(veh_id),
+            "angle": traci.vehicle.getAngle(veh_id)
         })
     return {"vehicles": vehicles, "heatmap": compute_heatmap()}
 

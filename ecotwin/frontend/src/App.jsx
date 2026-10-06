@@ -1,9 +1,6 @@
-import LiveMap from './components/LiveMap';
+// src/App.jsx
+import Dashboard from './components/Dashboard';
 
 export default function App() {
-  return (
-    <div style={{ height: '100vh', width: '100vw' }}>
-      <LiveMap />
-    </div>
-  );
+  return <Dashboard />;
 }

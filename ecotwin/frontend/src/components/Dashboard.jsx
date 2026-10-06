@@ -1,4 +1,3 @@
-// src/components/Dashboard.jsx
 import { useState } from 'react';
 import { useSimulationSocket } from '../hooks/useSimulationSocket';
 import StatusBar from './StatusBar';
@@ -6,6 +5,8 @@ import LayerToggle from './LayerToggle';
 import HeatmapLegend from './HeatmapLegend';
 import StatCard from './StatCard';
 import VehicleTooltip from './VehicleTooltip';
+import RoadBackground from './RoadBackground';
+import Car from './Car';
 
 const VIEWBOX = "0 0 620 620";
 const CELL_SIZE = 62;
@@ -49,13 +50,9 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    <svg viewBox={VIEWBOX} style={{ width: '100%', height: '100%', background: '#111' }}>
-                        {[0, 200, 400, 600].map((pos) => (
-                            <g key={pos}>
-                                <line x1={pos} y1="0" x2={pos} y2="600" stroke="#2a2a2a" strokeWidth="2" />
-                                <line x1="0" y1={pos} x2="600" y2={pos} stroke="#2a2a2a" strokeWidth="2" />
-                            </g>
-                        ))}
+                    <svg viewBox={VIEWBOX} style={{ width: '100%', height: '100%', background: '#0a120a' }}>
+                        <RoadBackground />
+
                         {showHeatmap && Object.entries(heatmap || {}).map(([key, co2]) => {
                             const [cx, cy] = key.split(',').map(Number);
                             return (
@@ -63,10 +60,10 @@ export default function Dashboard() {
                                     width={CELL_SIZE} height={CELL_SIZE} fill={co2ToColor(co2, maxCo2)} />
                             );
                         })}
+
                         {showVehicles && vehicles.map((v) => (
-                            <circle
-                                key={v.id} cx={v.x} cy={v.y} r="5" fill="#ff8c00"
-                                style={{ transition: 'cx 0.15s linear, cy 0.15s linear', cursor: 'pointer' }}
+                            <Car
+                                key={v.id} x={v.x} y={v.y} angle={v.angle || 0}
                                 onMouseEnter={(e) => { setHoveredVehicle(v); setMousePos({ x: e.clientX, y: e.clientY }); }}
                                 onMouseLeave={() => setHoveredVehicle(null)}
                             />
