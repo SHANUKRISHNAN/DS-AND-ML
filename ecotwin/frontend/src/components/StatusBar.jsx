@@ -12,7 +12,7 @@ export default function StatusBar({ connected, stepCount, vehicleCount }) {
                     boxShadow: connected ? '0 0 6px #4ade80' : 'none',
                 }} />
                 <span style={{ color: '#aaa', fontSize: 13 }}>
-                    {connected ? 'Live' : 'Disconnected'}
+                    {connected ? 'Live Monitoring' : 'Disconnected'}
                 </span>
             </div>
             <span style={{ color: '#666', fontSize: 13 }}>Simulation Step {stepCount}</span>
