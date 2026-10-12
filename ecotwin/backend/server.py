@@ -5,54 +5,65 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 
-import traci
+import numpy as np
+import ray
 import sumolib
+import torch
+import traci
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from ray.rllib.algorithms.algorithm import Algorithm
-import numpy as np
-import torch
+from ray.tune.registry import register_env
 
-SUMO_BINARY = sumolib.checkBinary('sumo')  # resolves via $SUMO_HOME, doesn't depend on PATH
+# The live server builds observations and decision timing from the SAME code the
+# agent was trained with, so the two cannot drift apart.
+from ecotwin_env import EcoTwinEnv, ACTION_REPEAT, build_observation, unique_lanes
+
+SUMO_BINARY = sumolib.checkBinary('sumo')
 SUMO_CONFIG = "city_grid.sumocfg"
+TLS_IDS = ["A1", "A2", "B0", "B1", "B2", "B3", "C0", "C1", "C2", "C3", "D1", "D2"]
+CHECKPOINT_PATH = os.path.abspath("./checkpoints/final")
+
+GRID_SIZE = 620
+CELL_SIZE = 62
+NUM_CELLS = GRID_SIZE // CELL_SIZE
+HEATMAP_EVERY_N_STEPS = 5
+
 connected_clients: set[WebSocket] = set()
 
-GRID_SIZE = 620      # matches the SVG viewBox from GridMap.jsx / LiveMap.jsx
-CELL_SIZE = 62       # 10x10 heatmap cells across the grid
-NUM_CELLS = GRID_SIZE // CELL_SIZE  # 10
-
-CHECKPOINT_PATH = os.path.abspath("./checkpoints/final")
-TLS_IDS = ["A1", "A2", "B0", "B1", "B2", "B3", "C0", "C1", "C2", "C3", "D1", "D2"]
-
-import ray
-from ray.tune.registry import register_env
-from ecotwin_env import EcoTwinEnv
-
-TLS_IDS = ["A1", "A2", "B0", "B1", "B2", "B3", "C0", "C1", "C2", "C3", "D1", "D2"]
-register_env("ecotwin_env", lambda config: EcoTwinEnv("city_grid.sumocfg", TLS_IDS, max_steps=200))
-
+# from_checkpoint() rebuilds the algorithm's environment runners, which needs the
+# env name registered in THIS process (the checkpoint stores only the name).
+register_env(
+    "ecotwin_env",
+    lambda config: EcoTwinEnv(SUMO_CONFIG, TLS_IDS, max_steps=30, action_repeat=ACTION_REPEAT),
+)
 ray.init(ignore_reinit_error=True, log_to_driver=False)
-
 trained_algo = Algorithm.from_checkpoint(CHECKPOINT_PATH)
 policy_module = trained_algo.get_module()
 
 
+def get_agent_actions(obs):
+    """One phase decision per traffic light: logits (1, 48) -> (12, 4) -> argmax."""
+    obs_tensor = torch.from_numpy(obs.reshape(1, -1).astype(np.float32))
+    with torch.no_grad():
+        result = policy_module.forward_inference({"obs": obs_tensor})
+    logits = result["action_dist_inputs"].reshape(len(TLS_IDS), 4)
+    return torch.argmax(logits, dim=-1).numpy()
+
+
 def compute_heatmap():
-    """Buckets every vehicle's CO2 output into a coarse grid for the heatmap overlay.
-    Cell indices are clamped because a few network coordinates sit slightly outside
-    0-620 at the grid's edges (confirmed empirically: one real vehicle landed in
-    cell (4, -1) before clamping was added)."""
+    """Buckets each vehicle's CO2 into a 10x10 grid. Indices are clamped because a
+    few network coordinates sit slightly outside 0-620 at the grid edges."""
     cells = {}
     for veh_id in traci.vehicle.getIDList():
         x, y = traci.vehicle.getPosition(veh_id)
-        cell_x = max(0, min(NUM_CELLS - 1, int(x // CELL_SIZE)))
-        cell_y = max(0, min(NUM_CELLS - 1, int(y // CELL_SIZE)))
-        co2 = traci.vehicle.getCO2Emission(veh_id)
-        key = f"{cell_x},{cell_y}"
-        cells[key] = cells.get(key, 0.0) + co2
+        cx = max(0, min(NUM_CELLS - 1, int(x // CELL_SIZE)))
+        cy = max(0, min(NUM_CELLS - 1, int(y // CELL_SIZE)))
+        key = f"{cx},{cy}"
+        cells[key] = cells.get(key, 0.0) + traci.vehicle.getCO2Emission(veh_id)
     return cells
 
-# Modify get_live_sim_state() in server.py to include the heatmap:
-def get_live_sim_state():
+
+def get_vehicles():
     vehicles = []
     for veh_id in traci.vehicle.getIDList():
         x, y = traci.vehicle.getPosition(veh_id)
@@ -61,25 +72,34 @@ def get_live_sim_state():
             "x": x,
             "y": y,
             "co2": traci.vehicle.getCO2Emission(veh_id),
-            "angle": traci.vehicle.getAngle(veh_id)
+            "angle": traci.vehicle.getAngle(veh_id),
         })
-    return {"vehicles": vehicles, "heatmap": compute_heatmap()}
+    return vehicles
 
-CONTROL_INTERVAL=10
+
 async def simulation_loop():
+    """Owns the single TraCI connection. The trained agent decides every
+    ACTION_REPEAT simulated seconds (exactly as in training); the world steps
+    every second and is broadcast to every connected browser tab."""
+    traci.start([SUMO_BINARY, "-c", SUMO_CONFIG, "--no-warnings"])
+    lanes_by_tls = unique_lanes(TLS_IDS)
     step_count = 0
-    traci.start([SUMO_BINARY, "-c", SUMO_CONFIG])
+    last_heatmap = {}
     try:
         while traci.simulation.getMinExpectedNumber() > 0:
-            if step_count % CONTROL_INTERVAL == 0:
-                obs = get_agent_observation()  # same shape _get_obs() builds in ecotwin_env.py
-                actions = get_agent_actions(obs)
-                for tls_id, phase in zip(TLS_IDS, actions):
+            if step_count % ACTION_REPEAT == 0:
+                obs = build_observation(TLS_IDS, lanes_by_tls)
+                for tls_id, phase in zip(TLS_IDS, get_agent_actions(obs)):
                     traci.trafficlight.setPhase(tls_id, int(phase))
 
             traci.simulationStep()
             step_count += 1
-            state = json.dumps(get_live_sim_state())
+
+            # Recompute the (slower-changing) heatmap only every N steps, but send
+            # the latest one every message so the frontend never sees it vanish.
+            if step_count % HEATMAP_EVERY_N_STEPS == 0:
+                last_heatmap = compute_heatmap()
+            state = json.dumps({"vehicles": get_vehicles(), "heatmap": last_heatmap})
 
             dead = []
             for ws in connected_clients:
@@ -94,18 +114,6 @@ async def simulation_loop():
     finally:
         traci.close()
 
-
-def get_agent_observation():
-    """Mirrors EcoTwinEnv._get_obs() exactly -- the live server must build the
-    same observation shape/order the policy was trained on, or its decisions
-    will be meaningless."""
-    data = []
-    for tls_id in TLS_IDS:
-        lanes = traci.trafficlight.getControlledLanes(tls_id)
-        queue = sum(traci.lane.getLastStepHaltingNumber(l) for l in lanes)
-        co2 = sum(traci.lane.getCO2Emission(l) for l in lanes)
-        data.extend([queue, co2])
-    return np.array(data, dtype=np.float32)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -128,15 +136,6 @@ async def simulation_feed(websocket: WebSocket):
     connected_clients.add(websocket)
     try:
         while True:
-            await websocket.receive_text()  # keeps the connection open; client sends nothing
+            await websocket.receive_text()  # keeps the connection open
     except WebSocketDisconnect:
         connected_clients.discard(websocket)
-
-def get_agent_actions(obs):
-    """Runs one inference pass and decodes the flat logits into one phase
-    decision per traffic light. Verified shape: MultiDiscrete([4]*12) produces
-    a (1, 48) logits tensor -> reshape to (12, 4) -> argmax per row."""
-    obs_tensor = torch.from_numpy(obs.reshape(1, -1).astype(np.float32))
-    result = policy_module.forward_inference({"obs": obs_tensor})
-    logits = result["action_dist_inputs"].reshape(len(TLS_IDS), 4)
-    return torch.argmax(logits, dim=-1).numpy()
