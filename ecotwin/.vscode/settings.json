@@ -1,0 +1,9 @@
+// .vscode/settings.json
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/bin/python",
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/node_modules": true
+  }
+}
